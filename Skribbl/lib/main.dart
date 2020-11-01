@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:whiteboardkit/whiteboardkit.dart';
 import 'database.dart';
 
+String roomid = "3owUHLDLWyrhKLxhvWi6";
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -51,10 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
     widget.s = new StreamController();
     widget.controller = new DrawingController(enableChunk: true);
     var _chunkSubscription = widget.controller.onChunk().listen((chunk) {
-      var js = chunk.toJson();
-      FirestoreService.sendData(0, widget.controller.draw.toJson());
-      widget.controller1.streamController
-          .add(WhiteboardDraw.fromJson(widget.controller.draw.toJson()));
+      //var js = chunk.toJson();
+      FirestoreService.sendData(roomid, widget.controller.draw.toJson());
     });
     widget.controller1 = new DrawingController(enableChunk: true);
   }
@@ -76,26 +75,25 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             FlatButton(
-                onPressed: () {
-                  FirestoreService.sendData("5", "anything for now on");
-                },
-                child: Text("Send Data")),
+              child: Text("Create New Room and Join it"),
+              onPressed: () {
+                String x = FirestoreService.createRoom();
+                //New room creating and joining
+                setState(() {
+                  widget.controller.wipe();
+                  roomid = x;
+                });
+              },
+            ),
             Expanded(
                 child: StreamBuilder(
-                    stream: FirestoreService.getData(),
+                    stream: FirestoreService.getData(roomid),
                     builder: (BuildContext builder, AsyncSnapshot snap) {
                       print("Rebuilding this widget");
                       if (snap.data != null) {
-                        print(snap.data.documents.length);
-                        for (int i = 0; i < 1; i++) {
-                          var z = Map<String, dynamic>.from(
-                              snap.data.documents[i].data());
-                          print(z);
-                          widget.controller1.streamController
-                              .add(WhiteboardDraw.fromJson(z));
-                        }
-                        //print(mp);
-
+                        var z = snap.data.data();
+                        widget.controller1.streamController
+                            .add(WhiteboardDraw.fromJson(z));
                         return Whiteboard(controller: widget.controller1);
                       } else
                         return Whiteboard(controller: widget.controller1);

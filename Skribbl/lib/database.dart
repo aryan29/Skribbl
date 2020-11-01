@@ -5,21 +5,20 @@ class FirestoreService {
   static FirebaseFirestore _db = FirebaseFirestore.instance;
   //Send Data
   static sendData(id, file) {
-    var data = _db
-        .collection('rooms')
-        .doc('3owUHLDLWyrhKLxhvWi6')
-        .collection('drawing')
-        .doc(id.toString())
-        .set(file);
+    var data = _db.collection('rooms').doc(id).set(file);
   }
 
   //Get Data
-  static getData() {
-    Stream collectionStream = _db
-        .collection('rooms')
-        .doc('3owUHLDLWyrhKLxhvWi6')
-        .collection('drawing')
-        .snapshots();
+  static getData(id) {
+    Stream collectionStream = _db.collection('rooms').doc(id).snapshots();
     return collectionStream;
+  }
+
+  static createRoom() {
+    print("COming to create room");
+    var path = _db.collection('rooms').doc();
+    path.set({"height": 176, "width": 360, "lines": []});
+    print(path.id.toString());
+    return path.id.toString();
   }
 }
