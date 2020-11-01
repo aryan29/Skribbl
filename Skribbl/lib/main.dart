@@ -49,11 +49,12 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     widget.s = new StreamController();
-    widget.controller = new DrawingController();
-
-    var _chunkSubscription = widget.controller.onChange().listen((chunk) {
+    widget.controller = new DrawingController(enableChunk: true);
+    var _chunkSubscription = widget.controller.onChunk().listen((chunk) {
+      var js = chunk.toJson();
+      FirestoreService.sendData(0, widget.controller.draw.toJson());
       widget.controller1.streamController
-          .add(widget.controller.draw.copyWith());
+          .add(WhiteboardDraw.fromJson(widget.controller.draw.toJson()));
     });
     widget.controller1 = new DrawingController(enableChunk: true);
   }
@@ -76,19 +77,29 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             FlatButton(
                 onPressed: () {
-                  FirestoreService.sendData();
+                  FirestoreService.sendData("5", "anything for now on");
                 },
-                child: Text("Send Data"))
-            // Expanded(
-            //     child: StreamBuilder(
-            //         stream: widget.s.stream,
-            //         builder: (BuildContext builder, AsyncSnapshot snap) {
-            //           print("Rebuilding this widget");
-            //           if (snap.data != null) {
-            //             return Whiteboard(controller: widget.controller1);
-            //           } else
-            //             return Whiteboard(controller: widget.controller1);
-            //         })),
+                child: Text("Send Data")),
+            Expanded(
+                child: StreamBuilder(
+                    stream: FirestoreService.getData(),
+                    builder: (BuildContext builder, AsyncSnapshot snap) {
+                      print("Rebuilding this widget");
+                      if (snap.data != null) {
+                        print(snap.data.documents.length);
+                        for (int i = 0; i < 1; i++) {
+                          var z = Map<String, dynamic>.from(
+                              snap.data.documents[i].data());
+                          print(z);
+                          widget.controller1.streamController
+                              .add(WhiteboardDraw.fromJson(z));
+                        }
+                        //print(mp);
+
+                        return Whiteboard(controller: widget.controller1);
+                      } else
+                        return Whiteboard(controller: widget.controller1);
+                    })),
           ],
         ),
       ),

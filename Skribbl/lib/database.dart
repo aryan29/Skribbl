@@ -4,16 +4,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   static FirebaseFirestore _db = FirebaseFirestore.instance;
   //Send Data
-  static sendData() {
+  static sendData(id, file) {
     var data = _db
         .collection('rooms')
-        .doc('PKsj399FDmRnc4CfDZiG')
-        .set({"document": "okkk"});
+        .doc('3owUHLDLWyrhKLxhvWi6')
+        .collection('drawing')
+        .doc(id.toString())
+        .set(file);
   }
 
   //Get Data
   static getData() {
-    Stream collectionStream =
-        _db.collection('rooms').doc('PKsj399FDmRnc4CfDZiG').snapshots();
+    Stream collectionStream = _db
+        .collection('rooms')
+        .doc('3owUHLDLWyrhKLxhvWi6')
+        .collection('drawing')
+        .snapshots();
+    return collectionStream;
   }
 }
