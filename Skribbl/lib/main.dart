@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:whiteboardkit/whiteboardkit.dart';
 import 'database.dart';
+import 'drawer.dart';
 
 String roomid = "3owUHLDLWyrhKLxhvWi6";
 void main() async {
@@ -65,6 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
+      drawer: ChatDrawer(),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
