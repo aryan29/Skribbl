@@ -63,6 +63,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     print("Coming to build");
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      // resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Text(widget.title),
       ),
