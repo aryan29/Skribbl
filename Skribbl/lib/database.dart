@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
@@ -15,27 +14,40 @@ class FirestoreService {
   }
 
   static createRoom() {
+    //Creating Room
     print("COming to create room");
     var path = _db.collection('rooms').doc();
     path.set({"height": 176, "width": 360, "lines": []});
     print(path.id.toString());
     return path.id.toString();
+    //And add this user to this room with score 0
   }
 
-  static sendMessege(room_id, name, value) {
-    _db.collection("rooms").doc(room_id).collection("messages").add({
-      "name":name,
-      "time":DateTime.now(),
-      "value":value
-    });
+  static addUserRoom(roomId) {
+    print("Coming to add in room");
+    _db
+        .collection('rooms')
+        .doc(roomId)
+        .collection("users")
+        .add({"name": "Aryan", "score": 0});
   }
 
-  static getMessages(room_id) {
+  static sendMessege(roomId, name, value) {
+    print("Coming to send Message");
     _db
         .collection("rooms")
-        .doc(room_id)
+        .doc(roomId)
+        .collection("messages")
+        .add({"name": name, "time": DateTime.now(), "value": value});
+  }
+
+  static getMessages(roomId) {
+    Stream s = _db
+        .collection("rooms")
+        .doc(roomId)
         .collection("messages")
         .orderBy("time", descending: true)
         .snapshots();
+    return s;
   }
 }
