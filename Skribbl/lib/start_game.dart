@@ -1,8 +1,21 @@
 import 'dart:math';
 
+import 'package:Skribbl/game.dart';
 import 'package:flutter/material.dart';
 import 'global.dart' as global;
 import 'database.dart';
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: StartScreen());
+  }
+}
 
 class StartScreen extends StatefulWidget {
   StartScreen({Key key}) : super(key: key);
@@ -12,7 +25,9 @@ class StartScreen extends StatefulWidget {
 }
 
 TextEditingController myController = new TextEditingController();
+TextEditingController myController2 = new TextEditingController();
 bool error = false;
+var g = 1;
 
 class _StartScreenState extends State<StartScreen> {
   @override
@@ -24,68 +39,117 @@ class _StartScreenState extends State<StartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("Building again");
     validateName() {
       print(myController.text);
       return (myController.text == "");
     }
 
-    return MaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: Scaffold(
-        body: Container(
-          width: double.infinity,
-          color: Colors.white,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Container(
-                  width: 200,
-                  child: TextField(
-                    onChanged: (value) {
-                      if (value == "")
-                        setState(() {
-                          error = true;
-                        });
-                      else
-                        setState(() {
-                          error = false;
-                        });
-                    },
-                    controller: myController,
-                    decoration: InputDecoration(
-                      errorText: error ? "Name can't be empty" : null,
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: "Name",
-                      errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                          borderSide: BorderSide(color: Colors.red)),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                          borderSide: BorderSide(color: Colors.green)),
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Container(
+                width: 200,
+                child: TextField(
+                  onChanged: (value) {
+                    if (value == "")
+                      setState(() {
+                        error = true;
+                      });
+                    else
+                      setState(() {
+                        error = false;
+                      });
+                  },
+                  controller: myController,
+                  decoration: InputDecoration(
+                    errorText: error ? "Name can't be empty" : null,
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "Name",
+                    errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        borderSide: BorderSide(color: Colors.red)),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        borderSide: BorderSide(color: Colors.green)),
+                  ),
+                )),
+            Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Container(
+                    width: 150,
+                    height: 50,
+                    child: FlatButton(
+                      onPressed: () async {
+                        //Create Room
+                        String roomId = await FirestoreService.createRoom(
+                            myController.text);
+                        global.roomid = roomId;
+                        global.name = myController.text;
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => MyGame()));
+                        //Romm created redirect to some other page
+                      },
+                      child: Text("Create Game"),
+                      color: Colors.blueGrey[50],
                     ),
-                  )),
-              Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    FlatButton(
-                      onPressed: () {},
-                      child: Text("Create Room"),
-                      color: Colors.blueGrey[100],
+                  ),
+                  SizedBox(height: 40),
+                  SizedBox(
+                    width: 150,
+                    //height: 50,
+                    child: TextField(
+                      controller: myController2,
+                      autofocus: false,
+                      decoration: InputDecoration(
+                        errorText: (g == 0) ? "Wrong Code" : null,
+                        errorBorder: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(5.0)),
+                            borderSide: BorderSide(color: Colors.red)),
+                        focusedBorder: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(5.0)),
+                            borderSide: BorderSide(color: Colors.black)),
+                        hintText: "Enter code",
+                        filled: true,
+                        fillColor: Colors.blueGrey[50],
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.keyboard_arrow_right),
+                          onPressed: () {
+                            print("Button pressses");
+                            //Check if valid code
+                            FirestoreService.addUserInRoom(
+                                    myController.text, myController2.text)
+                                .then((res) {
+                              if (res == 1) {
+                                global.roomid = myController2.text;
+                                global.name = myController.text;
+                                //Room Joined redirect to some other page
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (BuildContext context) =>
+                                        MyGame()));
+                              }
+                              setState(() {
+                                g = res;
+                              });
+                            });
+                          },
+                        ),
+                      ),
                     ),
-                    FlatButton(
-                        onPressed: () {},
-                        child: Text("Join Room"),
-                        color: Colors.blueGrey[100])
-                  ],
-                ),
-              )
-            ],
-          ),
+                  )
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );

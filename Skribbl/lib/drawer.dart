@@ -121,3 +121,48 @@ class _ChatDrawerState extends State<ChatDrawer> {
     );
   }
 }
+
+class UsersDrawer extends StatefulWidget {
+  UsersDrawer({Key key}) : super(key: key);
+
+  @override
+  _UsersDrawerState createState() => _UsersDrawerState();
+}
+
+class _UsersDrawerState extends State<UsersDrawer> {
+  customizeUserName(var x) {
+    return Align(
+        alignment: Alignment.topRight,
+        child: Container(
+            width: 300,
+            padding: EdgeInsets.all(10),
+            margin: EdgeInsets.only(bottom: 5),
+            color: Colors.deepPurpleAccent[100],
+            child: Column(
+              children: <Widget>[
+                Text(x["name"]),
+                Text(x["score"].toString()),
+              ],
+            )));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 300,
+      color: Colors.black,
+      child: StreamBuilder(
+          stream: FirestoreService.getUsersInRoom(global.roomid),
+          builder: (context, snapshot) {
+            print(snapshot.data.documents.length);
+            if (snapshot.data != null) {
+              return ListView.builder(
+                  itemCount: snapshot.data.documents.length,
+                  itemBuilder: (context, index) =>
+                      customizeUserName(snapshot.data.documents[index]));
+            } else
+              return Container();
+          }),
+    );
+  }
+}
