@@ -127,7 +127,7 @@ class _StartScreenState extends State<StartScreen> {
                             print("Button pressses");
                             //Check if valid code
                             FirestoreService.addUserInRoom(
-                                    myController.text, myController2.text)
+                                    myController2.text, myController.text)
                                 .then((res) {
                               if (res == 1) {
                                 global.roomid = myController2.text;

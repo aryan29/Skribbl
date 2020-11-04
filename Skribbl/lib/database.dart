@@ -27,7 +27,8 @@ class FirestoreService {
   static Future<int> addUserInRoom(roomId, name) async {
     print("Coming to add in room");
     var z = await _db.collection('rooms').doc(roomId).get().then((doc) async {
-      // print(doc.exists);
+      print(doc.exists);
+      print(roomId);
       if (doc.exists) {
         await _db
             .collection('rooms')

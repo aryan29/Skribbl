@@ -9,19 +9,19 @@ import 'global.dart' as global;
 import 'start_game.dart';
 
 class MyGame extends StatefulWidget {
-  DrawingController controller;
-  MyGame({Key key, this.controller}) : super(key: key);
+  MyGame({Key key}) : super(key: key);
 
   @override
   _MyGame createState() => _MyGame();
 }
 
 class _MyGame extends State<MyGame> {
+  DrawingController controller;
   @override
   void initState() {
-    widget.controller = new DrawingController(enableChunk: true);
-    widget.controller.onChunk().listen((chunk) {
-      FirestoreService.sendData(global.roomid, widget.controller.draw.toJson());
+    controller = new DrawingController(enableChunk: true);
+    controller.onChunk().listen((chunk) {
+      FirestoreService.sendData(global.roomid, controller.draw.toJson());
     });
     super.initState();
   }
@@ -43,7 +43,7 @@ class _MyGame extends State<MyGame> {
           children: <Widget>[
             Expanded(
               child: Whiteboard(
-                controller: widget.controller,
+                controller: controller,
               ),
             ),
             Row(
@@ -82,7 +82,7 @@ class _MyGame extends State<MyGame> {
 
   @override
   void dispose() {
-    widget.controller.close();
+    controller.close();
     super.dispose();
   }
 }
