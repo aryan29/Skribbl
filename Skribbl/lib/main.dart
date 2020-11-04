@@ -31,13 +31,11 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   DrawingController controller, controller1;
   PlaybackController controller2;
-  StreamController s;
   MyHomePage(
       {Key key,
       this.title,
       this.controller,
       this.controller1,
-      this.s,
       this.controller2})
       : super(key: key);
   final String title;
@@ -49,13 +47,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
-    widget.s = new StreamController();
     widget.controller = new DrawingController(enableChunk: true);
+
     var _chunkSubscription = widget.controller.onChunk().listen((chunk) {
       //var js = chunk.toJson();
       FirestoreService.sendData(roomid, widget.controller.draw.toJson());
     });
-    widget.controller1 = new DrawingController(enableChunk: true);
+
+    widget.controller1 =
+        new DrawingController(enableChunk: true, readonly: true);
   }
 
   @override
@@ -108,7 +108,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void dispose() {
     widget.controller.close();
     widget.controller1.close();
-    widget.s.close();
     super.dispose();
   }
 }
