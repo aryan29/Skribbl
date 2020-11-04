@@ -5,7 +5,7 @@ class FirestoreService {
   static FirebaseFirestore _db = FirebaseFirestore.instance;
   //Send Data
   static sendData(id, file) {
-    var data = _db.collection('rooms').doc(id).set(file);
+    _db.collection('rooms').doc(id).set(file);
   }
 
   //Get Data
@@ -20,5 +20,22 @@ class FirestoreService {
     path.set({"height": 176, "width": 360, "lines": []});
     print(path.id.toString());
     return path.id.toString();
+  }
+
+  static sendMessege(room_id, name, value) {
+    _db.collection("rooms").doc(room_id).collection("messages").add({
+      "name":name,
+      "time":DateTime.now(),
+      "value":value
+    });
+  }
+
+  static getMessages(room_id) {
+    _db
+        .collection("rooms")
+        .doc(room_id)
+        .collection("messages")
+        .orderBy("time", descending: true)
+        .snapshots();
   }
 }
