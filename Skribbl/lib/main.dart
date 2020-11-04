@@ -6,11 +6,12 @@ import 'package:whiteboardkit/whiteboardkit.dart';
 import 'database.dart';
 import 'drawer.dart';
 import 'global.dart' as global;
+import 'start_game.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(StartScreen());
 }
 
 class MyApp extends StatelessWidget {
