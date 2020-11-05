@@ -29,6 +29,7 @@ class _MyGame extends State<MyGame> {
   addToStream() async {
     print("Coming to add in stream");
     var x = await FirestoreService.getCurrentData();
+    print(x);
     myStream.sink.add(x);
   }
 
@@ -62,6 +63,7 @@ class _MyGame extends State<MyGame> {
 
               controller =
                   new DrawingController(enableChunk: true, readonly: readonly);
+
               controller.onChunk().listen((chunk) {
                 print("Sending chunk");
                 FirestoreService.sendData(
@@ -88,16 +90,18 @@ class _MyGame extends State<MyGame> {
                             onFinished: () async {
                               //Now Rebuild this widget
                               print("Wiping from here");
-                              controller.streamController.add(
-                                  WhiteboardDraw.fromJson({
+                              controller.streamController
+                                  .add(WhiteboardDraw.fromJson({
                                 "height": 176,
                                 "width": 360,
-                                "lines": []
+                                "lines": [],
                               }));
                               controller.wipe();
-                              //controller.streamController.close();
-                              await FirestoreService.nextChance();
-                              await addToStream();
+                              controller.streamController.close();
+                              FirestoreService.nextChance().then((val) async {
+                                var x = await addToStream();
+                                return x;
+                              });
                             },
                           ),
                           //Show a 100 second timer and username
@@ -110,9 +114,12 @@ class _MyGame extends State<MyGame> {
                                   print("Rebuilding whiteboard");
                                   if (snap.data != null) {
                                     var z = snap.data.data();
-                                   // print(z);
-                                    controller.streamController.add(
-                                        WhiteboardDraw.fromJson(z['value']));
+                                    // print(z);
+                                    if (controller.streamController.isClosed ==
+                                        false) {
+                                      controller.streamController.add(
+                                          WhiteboardDraw.fromJson(z['value']));
+                                    }
                                     return Whiteboard(controller: controller);
                                   } else
                                     return Whiteboard(controller: controller);

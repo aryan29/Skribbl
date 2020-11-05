@@ -86,12 +86,16 @@ class FirestoreService {
     var data = snap.data();
     data['current'] += 1;
     if (data['current'] >= data['users_id'].length) data['current'] = 0;
-    _db
+    await _db
         .collection("rooms")
         .doc(global.roomid)
         .set(data, SetOptions(merge: true));
-    print("Cleaning whiteboard");
-    _db.collection('rooms').doc(global.roomid).update({"value.lines": []});
+    print("Cleaning whiteboardssssss");
+    await _db
+        .collection('rooms')
+        .doc(global.roomid)
+        .update({"value.lines": []});
+    print("Updation done");
   }
 
   static getCurrentData() async {
