@@ -85,6 +85,7 @@ class FirestoreService {
     var snap = await _db.collection("rooms").doc(global.roomid).get();
     var data = snap.data();
     data['current'] += 1;
+    if (data['current'].length > data['users_id'].length) data['current'] = 0;
     _db
         .collection("rooms")
         .doc(global.roomid)
@@ -94,7 +95,14 @@ class FirestoreService {
   static getCurrentData() async {
     var snap = await _db.collection("rooms").doc(global.roomid).get();
     var data = snap.data();
-    return data['users_id']['current'];
+    var snap2 = await _db
+        .collection("rooms")
+        .doc(global.roomid)
+        .collection("users")
+        .doc(data['users_id']['current'])
+        .get();
+    var data2 = snap2.data();
+    return {"id": data['users_id']['current'], "name": data2['name']};
   }
 
   static sendMessege(roomId, name, value) async {
