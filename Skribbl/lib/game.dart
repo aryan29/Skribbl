@@ -20,12 +20,22 @@ class _MyGame extends State<MyGame> {
   StreamController<Map<String, dynamic>> myStream;
   @override
   void initState() {
+    print("Coming to init state");
     myStream = new StreamController();
+
     super.initState();
   }
 
   addToStream() async {
-    myStream.sink.add(FirestoreService.getCurrentData());
+    print("Coming to add in stream");
+    var x = await FirestoreService.getCurrentData();
+    myStream.sink.add(x);
+  }
+
+  getInitData() async {
+    print("getting init data");
+    var z = await FirestoreService.getCurrentData();
+    return z;
   }
 
   @override
@@ -40,6 +50,7 @@ class _MyGame extends State<MyGame> {
         drawer: ChatDrawer(),
         endDrawer: UsersDrawer(),
         body: StreamBuilder(
+            initialData: {"id": 1, "name": "Buddy5455"},
             stream: myStream.stream,
             builder: (context, snapshot) {
               print("Rebulding stream builder");
@@ -48,15 +59,21 @@ class _MyGame extends State<MyGame> {
               String drawingUser;
               var data = snapshot.data;
               if (data["id"] == global.key) readonly = false;
+
               controller =
                   new DrawingController(enableChunk: true, readonly: readonly);
               controller.onChunk().listen((chunk) {
                 print("Sending chunk");
                 FirestoreService.sendData(
                     global.roomid, controller.draw.toJson());
-                drawingUser = data["name"];
-                if (snapshot.data != null) {
-                  return Center(
+              });
+              int time = 10;
+              drawingUser = data["name"];
+              print(drawingUser);
+              // print("Variables initialized");
+              if (snapshot.data != null) {
+                return Container(
+                  child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -64,23 +81,42 @@ class _MyGame extends State<MyGame> {
                           height: 50,
                           alignment: Alignment.center,
                           child: Countdown(
-                            seconds: 80,
+                            seconds: time,
                             build: (BuildContext context, double time) =>
                                 Text(time.toString()),
                             interval: Duration(milliseconds: 100),
                             onFinished: () async {
-                              await FirestoreService.nextChance();
                               //Now Rebuild this widget
+                              print("Wiping from here");
+                              controller.streamController.add(
+                                  WhiteboardDraw.fromJson({
+                                "height": 176,
+                                "width": 360,
+                                "lines": []
+                              }));
+                              controller.wipe();
+                              //controller.streamController.close();
+                              await FirestoreService.nextChance();
                               await addToStream();
                             },
                           ),
                           //Show a 100 second timer and username
                         ),
                         Expanded(
-                          child: Whiteboard(
-                            controller: controller,
-                          ),
-                        ),
+                            child: StreamBuilder(
+                                stream: FirestoreService.getData(global.roomid),
+                                builder:
+                                    (BuildContext builder, AsyncSnapshot snap) {
+                                  print("Rebuilding whiteboard");
+                                  if (snap.data != null) {
+                                    var z = snap.data.data();
+                                   // print(z);
+                                    controller.streamController.add(
+                                        WhiteboardDraw.fromJson(z['value']));
+                                    return Whiteboard(controller: controller);
+                                  } else
+                                    return Whiteboard(controller: controller);
+                                })),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
@@ -111,12 +147,13 @@ class _MyGame extends State<MyGame> {
                         )
                       ],
                     ),
-                  );
-                } else
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-              });
+                  ),
+                );
+              } else {
+                return Container(
+                  child: CircularProgressIndicator(),
+                );
+              }
             }));
   }
 }

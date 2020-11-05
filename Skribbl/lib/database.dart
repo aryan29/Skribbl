@@ -24,7 +24,7 @@ class FirestoreService {
         "width": 360,
         "lines": [],
       },
-      "user_id": [],
+      "users_id": [],
       "current": 0
     });
     print(path.id.toString());
@@ -40,14 +40,14 @@ class FirestoreService {
         //Add this user in room and also add this to user_id
         var snap = await _db.collection("rooms").doc(roomId).get();
         List li = snap.data()['users_id'];
-        if (li.length != 0) {
+        if (li != null && li.length != 0) {
           li.add(li.last + 1);
           global.key = li.last + 1;
         } else {
-          li.add(1);
+          li = [1];
           global.key = 1;
         }
-
+        await _db.collection("rooms").doc(roomId).update({"users_id": li});
         var d = await _db.collection("rooms").doc(roomId).get();
         await _db
             .collection('rooms')
@@ -85,24 +85,33 @@ class FirestoreService {
     var snap = await _db.collection("rooms").doc(global.roomid).get();
     var data = snap.data();
     data['current'] += 1;
-    if (data['current'].length > data['users_id'].length) data['current'] = 0;
+    if (data['current'] >= data['users_id'].length) data['current'] = 0;
     _db
         .collection("rooms")
         .doc(global.roomid)
         .set(data, SetOptions(merge: true));
+    print("Cleaning whiteboard");
+    _db.collection('rooms').doc(global.roomid).update({"value.lines": []});
   }
 
   static getCurrentData() async {
+    print("Coming to getData");
     var snap = await _db.collection("rooms").doc(global.roomid).get();
     var data = snap.data();
+    print(data['users_id']);
+    print(data['current']);
+    String userid = data['users_id'][data['current']].toString();
     var snap2 = await _db
         .collection("rooms")
         .doc(global.roomid)
         .collection("users")
-        .doc(data['users_id']['current'])
+        .doc(userid)
         .get();
     var data2 = snap2.data();
-    return {"id": data['users_id']['current'], "name": data2['name']};
+    print(data);
+    print(data2);
+    return Map<String, dynamic>.from(
+        {"id": data['users_id'][data['current']], "name": data2['name']});
   }
 
   static sendMessege(roomId, name, value) async {
