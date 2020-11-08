@@ -86,7 +86,6 @@ class FirestoreService {
     //Having a next chance will also decide on which user whiteboard
     //will be editale and word will be shown
     //Run it if called from creator only
-
     await _db
         .collection('rooms')
         .doc(global.roomid)

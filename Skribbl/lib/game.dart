@@ -17,8 +17,9 @@ class MyGame extends StatefulWidget {
   _MyGame createState() => _MyGame();
 }
 
+StreamController<Map<String, dynamic>> myStream;
+
 class _MyGame extends State<MyGame> {
-  StreamController<Map<String, dynamic>> myStream;
   @override
   void initState() {
     print("Coming to init state");
@@ -91,7 +92,7 @@ class _MyGame extends State<MyGame> {
                           alignment: Alignment.center,
                           child: Countdown(
                             controller: c,
-                            seconds: 20,
+                            seconds: time,
                             build: (BuildContext context, double time) =>
                                 Text(time.toString()),
                             interval: Duration(milliseconds: 100),
@@ -114,13 +115,6 @@ class _MyGame extends State<MyGame> {
                                   return x;
                                 });
                               }
-                              // else {
-                              //   //Just do nothing
-                              //   //my chance is finished that means I have changed value in db
-                              //   //that means all others whiteboard will rebuild themselves
-                              //   //then one of them might be having there chance
-                              //   await addToStream();
-                              // }
                             },
                           ),
                           //Show a 100 second timer and username

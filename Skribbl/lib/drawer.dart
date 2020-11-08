@@ -3,13 +3,13 @@ import 'global.dart' as global;
 import 'database.dart';
 
 class ChatDrawer extends StatefulWidget {
+  ChatDrawer({Key key}) : super(key: key);
   @override
   _ChatDrawerState createState() => _ChatDrawerState();
-}
-
-var myMessageController = new TextEditingController();
+}  
 
 class _ChatDrawerState extends State<ChatDrawer> {
+  var myMessageController = new TextEditingController();
   buildItem(data) {
     return Align(
       alignment: Alignment.topLeft,
@@ -95,7 +95,7 @@ class _ChatDrawerState extends State<ChatDrawer> {
                     height: 50,
                     child: TextField(
                       controller: myMessageController,
-                      autofocus: true,
+                      autofocus: false,
                       decoration: InputDecoration(
                           hintText: "Type here",
                           filled: true,
@@ -109,7 +109,12 @@ class _ChatDrawerState extends State<ChatDrawer> {
                                 //And show it on screen of every other user too at the same time
                                 FirestoreService.sendMessege(global.roomid,
                                     global.name, myMessageController.text);
-                                myMessageController.clear();
+                                FocusScope.of(context).unfocus();
+                                Future.delayed(Duration(microseconds: 500), () {
+                                  //call back after 500  microseconds
+                                  myMessageController
+                                      .clear(); // clear textfield
+                                });
                               })),
                     ),
                   )
