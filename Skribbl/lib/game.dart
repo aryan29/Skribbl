@@ -18,6 +18,10 @@ class MyGame extends StatefulWidget {
 }
 
 StreamController<Map<String, dynamic>> myStream;
+DrawingController controller;
+bool readonly = true;
+String drawingUser;
+int time = 20;
 
 class _MyGame extends State<MyGame> {
   @override
@@ -58,28 +62,30 @@ class _MyGame extends State<MyGame> {
             initialData: {"id": 1, "name": "Buddy5455"},
             stream: myStream.stream,
             builder: (context, snapshot) {
-              print("Rebulding stream builder");
-              DrawingController controller;
-              bool readonly = true;
-              String drawingUser;
-              var data = snapshot.data;
-              print(data["id"]);
-              print(global.key);
-              print(global.name);
-              if (data["id"] == global.key) readonly = false;
-              print("Readonly set to " + readonly.toString());
-              controller =
-                  new DrawingController(enableChunk: true, readonly: readonly);
+              print(c.isCompleted);
+              if (c.isCompleted == null || c.isCompleted == true) {
+                print("Rebulding stream builder");
+                var data = snapshot.data;
+                print(data["id"]);
+                print(global.key);
+                print(global.name);
+                if (data["id"] == global.key)
+                  readonly = false;
+                else
+                  readonly = true;
+                print("Readonly set to " + readonly.toString());
+                controller = new DrawingController(
+                    enableChunk: true, readonly: readonly);
 
-              controller.onChunk().listen((chunk) {
-                print("Sending chunk");
-                FirestoreService.sendData(
-                    global.roomid, controller.draw.toJson());
-              });
-              int time = 10;
-              drawingUser = data["name"];
-              c.restart();
-              print(drawingUser);
+                controller.onChunk().listen((chunk) {
+                  print("Sending chunk");
+                  FirestoreService.sendData(
+                      global.roomid, controller.draw.toJson());
+                });
+                drawingUser = data["name"];
+                c.restart();
+                print(drawingUser);
+              }
               // print("Variables initialized");
               if (snapshot.data != null) {
                 return Container(
@@ -129,6 +135,7 @@ class _MyGame extends State<MyGame> {
                                     var z = snap.data.data();
                                     if (global.current !=
                                         z["users_id"][z["current"]]) {
+                                      c.isCompleted = true;
                                       FirestoreService.getCurrentData()
                                           .then((val) {
                                         global.current =
