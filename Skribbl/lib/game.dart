@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:timer_count_down/timer_controller.dart';
 import 'package:whiteboardkit/whiteboardkit.dart';
 import 'database.dart';
 import 'drawer.dart';
@@ -41,6 +42,7 @@ class _MyGame extends State<MyGame> {
 
   @override
   Widget build(BuildContext context) {
+    CountdownController c = new CountdownController();
     print("Coming to build");
     return Scaffold(
         resizeToAvoidBottomInset: false,
@@ -59,8 +61,11 @@ class _MyGame extends State<MyGame> {
               bool readonly = true;
               String drawingUser;
               var data = snapshot.data;
+              print(data["id"]);
+              print(global.key);
+              print(global.name);
               if (data["id"] == global.key) readonly = false;
-
+              print("Readonly set to " + readonly.toString());
               controller =
                   new DrawingController(enableChunk: true, readonly: readonly);
 
@@ -71,6 +76,7 @@ class _MyGame extends State<MyGame> {
               });
               int time = 10;
               drawingUser = data["name"];
+              c.restart();
               print(drawingUser);
               // print("Variables initialized");
               if (snapshot.data != null) {
@@ -83,25 +89,36 @@ class _MyGame extends State<MyGame> {
                           height: 50,
                           alignment: Alignment.center,
                           child: Countdown(
-                            seconds: time,
+                            controller: c,
+                            seconds: 10,
                             build: (BuildContext context, double time) =>
                                 Text(time.toString()),
                             interval: Duration(milliseconds: 100),
                             onFinished: () async {
                               //Now Rebuild this widget
-                              print("Wiping from here");
-                              controller.streamController
-                                  .add(WhiteboardDraw.fromJson({
-                                "height": 176,
-                                "width": 360,
-                                "lines": [],
-                              }));
-                              controller.wipe();
-                              controller.streamController.close();
-                              FirestoreService.nextChance().then((val) async {
-                                var x = await addToStream();
-                                return x;
-                              });
+
+                              if (readonly == false) {
+                                print("Wiping from here");
+                                controller.streamController
+                                    .add(WhiteboardDraw.fromJson({
+                                  "height": 176,
+                                  "width": 360,
+                                  "lines": [],
+                                }));
+                                controller.wipe();
+                                controller.streamController.close();
+                                FirestoreService.nextChance().then((val) async {
+                                  var x = await addToStream();
+                                  return x;
+                                });
+                              }
+                              // else {
+                              //   //Just do nothing
+                              //   //my chance is finished that means I have changed value in db
+                              //   //that means all others whiteboard will rebuild themselves
+                              //   //then one of them might be having there chance
+                              //   await addToStream();
+                              // }
                             },
                           ),
                           //Show a 100 second timer and username
@@ -114,7 +131,16 @@ class _MyGame extends State<MyGame> {
                                   print("Rebuilding whiteboard");
                                   if (snap.data != null) {
                                     var z = snap.data.data();
-                                    // print(z);
+                                    if (global.current !=
+                                        z["users_id"][z["current"]]) {
+                                      //Newly entered user to bring him in sync
+                                      FirestoreService.getCurrentData()
+                                          .then((val) {
+                                        global.current =
+                                            z["users_id"][z["current"]];
+                                        myStream.sink.add(val);
+                                      });
+                                    }
                                     if (controller.streamController.isClosed ==
                                         false) {
                                       controller.streamController.add(

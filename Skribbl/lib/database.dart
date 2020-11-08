@@ -34,19 +34,23 @@ class FirestoreService {
   }
 
   static Future<int> addUserInRoom(roomId, name) async {
+    print(roomId);
+    print(name);
     print("Coming to add in room");
     var z = await _db.collection('rooms').doc(roomId).get().then((doc) async {
       if (doc.exists) {
+        
         //Add this user in room and also add this to user_id
         var snap = await _db.collection("rooms").doc(roomId).get();
         List li = snap.data()['users_id'];
         if (li != null && li.length != 0) {
           li.add(li.last + 1);
-          global.key = li.last + 1;
+          global.key = li.last;
         } else {
           li = [1];
           global.key = 1;
         }
+        global.current=li[snap.data()['current']];
         await _db.collection("rooms").doc(roomId).update({"users_id": li});
         var d = await _db.collection("rooms").doc(roomId).get();
         await _db
@@ -82,6 +86,8 @@ class FirestoreService {
   static nextChance() async {
     //Having a next chance will also decide on which user whiteboard
     //will be editale and word will be shown
+    //Run it if called from creator only
+   
     var snap = await _db.collection("rooms").doc(global.roomid).get();
     var data = snap.data();
     data['current'] += 1;
@@ -146,3 +152,5 @@ class FirestoreService {
         .snapshots();
   }
 }
+//ux7Vh79cpAye2n2Sxl3m
+//ux7Vh9cpAye2n2Sxl3m
