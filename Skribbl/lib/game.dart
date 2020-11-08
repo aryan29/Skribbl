@@ -90,7 +90,7 @@ class _MyGame extends State<MyGame> {
                           alignment: Alignment.center,
                           child: Countdown(
                             controller: c,
-                            seconds: 10,
+                            seconds: 100,
                             build: (BuildContext context, double time) =>
                                 Text(time.toString()),
                             interval: Duration(milliseconds: 100),
@@ -105,7 +105,7 @@ class _MyGame extends State<MyGame> {
                                   "width": 360,
                                   "lines": [],
                                 }));
-                                controller.wipe();
+                               controller.wipe();
                                 controller.streamController.close();
                                 FirestoreService.nextChance().then((val) async {
                                   var x = await addToStream();
