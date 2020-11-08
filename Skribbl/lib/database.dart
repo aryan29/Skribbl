@@ -39,7 +39,6 @@ class FirestoreService {
     print("Coming to add in room");
     var z = await _db.collection('rooms').doc(roomId).get().then((doc) async {
       if (doc.exists) {
-        
         //Add this user in room and also add this to user_id
         var snap = await _db.collection("rooms").doc(roomId).get();
         List li = snap.data()['users_id'];
@@ -50,7 +49,7 @@ class FirestoreService {
           li = [1];
           global.key = 1;
         }
-        global.current=li[snap.data()['current']];
+        global.current = li[snap.data()['current']];
         await _db.collection("rooms").doc(roomId).update({"users_id": li});
         var d = await _db.collection("rooms").doc(roomId).get();
         await _db
@@ -87,21 +86,21 @@ class FirestoreService {
     //Having a next chance will also decide on which user whiteboard
     //will be editale and word will be shown
     //Run it if called from creator only
-   
-    var snap = await _db.collection("rooms").doc(global.roomid).get();
-    var data = snap.data();
-    data['current'] += 1;
-    if (data['current'] >= data['users_id'].length) data['current'] = 0;
-    await _db
-        .collection("rooms")
-        .doc(global.roomid)
-        .set(data, SetOptions(merge: true));
-    print("Cleaning whiteboardssssss");
+
     await _db
         .collection('rooms')
         .doc(global.roomid)
-        .update({"value.lines": []});
-    print("Updation done");
+        .update({"value.lines": []}).then((value) async {
+      var snap = await _db.collection("rooms").doc(global.roomid).get();
+      var data = snap.data();
+      data['current'] += 1;
+      if (data['current'] >= data['users_id'].length) data['current'] = 0;
+      await _db
+          .collection("rooms")
+          .doc(global.roomid)
+          .set(data, SetOptions(merge: true));
+      print("Cleaning whiteboardssssss");
+    });
   }
 
   static getCurrentData() async {

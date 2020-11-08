@@ -30,6 +30,7 @@ class _MyGame extends State<MyGame> {
   addToStream() async {
     print("Coming to add in stream");
     var x = await FirestoreService.getCurrentData();
+    global.current = x["id"];
     print(x);
     myStream.sink.add(x);
   }
@@ -90,7 +91,7 @@ class _MyGame extends State<MyGame> {
                           alignment: Alignment.center,
                           child: Countdown(
                             controller: c,
-                            seconds: 100,
+                            seconds: 20,
                             build: (BuildContext context, double time) =>
                                 Text(time.toString()),
                             interval: Duration(milliseconds: 100),
@@ -105,7 +106,8 @@ class _MyGame extends State<MyGame> {
                                   "width": 360,
                                   "lines": [],
                                 }));
-                               controller.wipe();
+                                controller.wipe();
+
                                 controller.streamController.close();
                                 FirestoreService.nextChance().then((val) async {
                                   var x = await addToStream();
@@ -133,7 +135,6 @@ class _MyGame extends State<MyGame> {
                                     var z = snap.data.data();
                                     if (global.current !=
                                         z["users_id"][z["current"]]) {
-                                      //Newly entered user to bring him in sync
                                       FirestoreService.getCurrentData()
                                           .then((val) {
                                         global.current =
