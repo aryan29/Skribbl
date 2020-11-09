@@ -23,7 +23,7 @@ StreamController<Map<String, dynamic>> myStream;
 DrawingController controller;
 bool readonly = true;
 String drawingUser;
-int time = 20;
+int time = 50;
 
 class _MyGame extends State<MyGame> {
   @override
@@ -37,21 +37,25 @@ class _MyGame extends State<MyGame> {
     print("Coming to add in stream");
     var x = await FirestoreService.getCurrentData();
     global.current = x["id"];
-    print(x);
-
     myStream.sink.add(x);
   }
 
-  getInitData() async {
-    print("getting init data");
-    var z = await FirestoreService.getCurrentData();
-    return z;
+  getWord() {
+    print("Coming to get word");
+    print(readonly);
+    print(global.random_word);
+    return (readonly == false)
+        ? new Container(child: Text(global.random_word)
+            //Showing the random word
+            )
+        : new Container(child: Text("No Word"));
   }
 
   @override
   Widget build(BuildContext context) {
     CountdownController c = new CountdownController();
     print("Coming to build");
+
     return Scaffold(
         resizeToAvoidBottomInset: false,
         // resizeToAvoidBottomPadding: false,
@@ -61,35 +65,32 @@ class _MyGame extends State<MyGame> {
         drawer: ChatDrawer(),
         endDrawer: UsersDrawer(),
         body: StreamBuilder(
-            initialData: {"id": 1, "name": "Buddy5455"},
+            //initialData: {"id": 1, "name": "Buddy5455"},
             stream: myStream.stream,
             builder: (context, snapshot) {
-              print(c.isCompleted);
-              if (c.isCompleted == null || c.isCompleted == true) {
-                print("Rebulding stream builder");
-                var data = snapshot.data;
-                print(data["id"]);
-                print(global.key);
-                print(global.name);
-                if (data["id"] == global.key)
-                  readonly = false;
-                else
-                  readonly = true;
-                print("Readonly set to " + readonly.toString());
-                controller = new DrawingController(
-                    enableChunk: true, readonly: readonly);
-
-                controller.onChunk().listen((chunk) {
-                  print("Sending chunk");
-                  FirestoreService.sendData(
-                      global.roomid, controller.draw.toJson());
-                });
-                drawingUser = data["name"];
-                c.restart();
-                print(drawingUser);
-              }
               // print("Variables initialized");
               if (snapshot.data != null) {
+                print(c.isCompleted);
+                if (c.isCompleted == null || c.isCompleted == true) {
+                  print("Rebulding stream builder");
+                  var data = snapshot.data;
+                  if (data["id"] == global.key)
+                    readonly = false;
+                  else
+                    readonly = true;
+                  print("Readonly set to " + readonly.toString());
+                  controller = new DrawingController(
+                      enableChunk: true, readonly: readonly);
+
+                  controller.onChunk().listen((chunk) {
+                    print("Sending chunk");
+                    FirestoreService.sendData(
+                        global.roomid, controller.draw.toJson());
+                  });
+                  drawingUser = data["name"];
+                  c.restart();
+                  print(drawingUser);
+                }
                 return Container(
                   child: Center(
                     child: Column(
@@ -130,7 +131,7 @@ class _MyGame extends State<MyGame> {
                         Container(
                             height: 50,
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: <Widget>[
                                 //Name of person
                                 //Name of word
@@ -141,11 +142,7 @@ class _MyGame extends State<MyGame> {
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ),
-                                (readonly == false)
-                                    ? Container(child: Text(global.random_word)
-                                        //Showing the random word
-                                        )
-                                    : Container()
+                                getWord()
                               ],
                             )),
                         Expanded(
@@ -208,8 +205,10 @@ class _MyGame extends State<MyGame> {
                   ),
                 );
               } else {
+                //Add something to stream
+                addToStream();
                 return Container(
-                  child: CircularProgressIndicator(),
+                  child: Center(child: CircularProgressIndicator()),
                 );
               }
             }));

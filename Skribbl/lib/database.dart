@@ -19,8 +19,11 @@ class FirestoreService {
 
   static createRoom(name) async {
     //Creating Room
+
     String word = nouns[random.nextInt(nouns.length)];
+
     print("Coming to create room");
+    print("Word is " + word);
     var path = _db.collection('rooms').doc();
     await path.set({
       "value": {
@@ -92,6 +95,7 @@ class FirestoreService {
     //will be editale and word will be shown
     //Run it if called from creator only
     String word = nouns[random.nextInt(nouns.length)];
+    print("Word is " + word);
     await _db
         .collection('rooms')
         .doc(global.roomid)
@@ -112,8 +116,7 @@ class FirestoreService {
     print("Coming to getData");
     var snap = await _db.collection("rooms").doc(global.roomid).get();
     var data = snap.data();
-    print(data['users_id']);
-    print(data['current']);
+    global.random_word = data["word"];
     String userid = data['users_id'][data['current']].toString();
     var snap2 = await _db
         .collection("rooms")
@@ -122,6 +125,7 @@ class FirestoreService {
         .doc(userid)
         .get();
     var data2 = snap2.data();
+
     print(data);
     print(data2);
     return Map<String, dynamic>.from(
