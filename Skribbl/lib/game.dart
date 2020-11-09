@@ -40,17 +40,6 @@ class _MyGame extends State<MyGame> {
     myStream.sink.add(x);
   }
 
-  getWord() {
-    print("Coming to get word");
-    print(readonly);
-    print(global.random_word);
-    return (readonly == false)
-        ? new Container(child: Text(global.random_word)
-            //Showing the random word
-            )
-        : new Container(child: Text("No Word"));
-  }
-
   @override
   Widget build(BuildContext context) {
     CountdownController c = new CountdownController();
@@ -142,7 +131,8 @@ class _MyGame extends State<MyGame> {
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ),
-                                getWord()
+                                if (readonly == false)
+                                  Container(child: Text(global.random_word)),
                               ],
                             )),
                         Expanded(
