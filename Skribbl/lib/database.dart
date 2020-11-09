@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'global.dart' as global;
+import 'package:english_words/english_words.dart';
+import "dart:math";
 
 class FirestoreService {
   static FirebaseFirestore _db = FirebaseFirestore.instance;
+  static Random random = new Random();
   //Send Data
   static sendData(id, file) async {
     await _db.collection('rooms').doc(id).update({"value": file});
@@ -16,6 +19,7 @@ class FirestoreService {
 
   static createRoom(name) async {
     //Creating Room
+    String word = nouns[random.nextInt(nouns.length)];
     print("Coming to create room");
     var path = _db.collection('rooms').doc();
     await path.set({
@@ -25,7 +29,8 @@ class FirestoreService {
         "lines": [],
       },
       "users_id": [],
-      "current": 0
+      "current": 0,
+      "word": word
     });
     print(path.id.toString());
     await addUserInRoom(path.id.toString(), name);
@@ -86,10 +91,11 @@ class FirestoreService {
     //Having a next chance will also decide on which user whiteboard
     //will be editale and word will be shown
     //Run it if called from creator only
+    String word = nouns[random.nextInt(nouns.length)];
     await _db
         .collection('rooms')
         .doc(global.roomid)
-        .update({"value.lines": []}).then((value) async {
+        .update({"value.lines": [], "word": word}).then((value) async {
       var snap = await _db.collection("rooms").doc(global.roomid).get();
       var data = snap.data();
       data['current'] += 1;
@@ -124,11 +130,20 @@ class FirestoreService {
 
   static sendMessege(roomId, name, value) async {
     print("Coming to send Message");
-    await _db
-        .collection("rooms")
-        .doc(roomId)
-        .collection("messages")
-        .add({"name": name, "time": DateTime.now(), "value": value});
+    if (value != global.random_word) {
+      await _db
+          .collection("rooms")
+          .doc(roomId)
+          .collection("messages")
+          .add({"name": name, "time": DateTime.now(), "value": value});
+    } else {
+      await _db
+          .collection("rooms")
+          .doc(roomId)
+          .collection("users")
+          .doc(global.key.toString())
+          .update({"score": FieldValue.increment(1)});
+    }
   }
 
   static getMessages(roomId) {

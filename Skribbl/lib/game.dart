@@ -9,6 +9,8 @@ import 'drawer.dart';
 import 'global.dart' as global;
 import 'start_game.dart';
 import 'package:timer_count_down/timer_count_down.dart';
+import 'package:english_words/english_words.dart';
+import "dart:math";
 
 class MyGame extends StatefulWidget {
   MyGame({Key key}) : super(key: key);
@@ -28,7 +30,6 @@ class _MyGame extends State<MyGame> {
   void initState() {
     print("Coming to init state");
     myStream = new StreamController();
-
     super.initState();
   }
 
@@ -37,6 +38,7 @@ class _MyGame extends State<MyGame> {
     var x = await FirestoreService.getCurrentData();
     global.current = x["id"];
     print(x);
+
     myStream.sink.add(x);
   }
 
@@ -125,6 +127,27 @@ class _MyGame extends State<MyGame> {
                           ),
                           //Show a 100 second timer and username
                         ),
+                        Container(
+                            height: 50,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                //Name of person
+                                //Name of word
+                                Container(
+                                  child: Text(
+                                    drawingUser,
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                (readonly == false)
+                                    ? Container(child: Text(global.random_word)
+                                        //Showing the random word
+                                        )
+                                    : Container()
+                              ],
+                            )),
                         Expanded(
                             child: StreamBuilder(
                                 stream: FirestoreService.getData(global.roomid),
