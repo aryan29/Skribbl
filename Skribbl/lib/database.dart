@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'global.dart' as global;
 import 'package:english_words/english_words.dart';
 import "dart:math";
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 class FirestoreService {
   static FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -167,6 +168,39 @@ class FirestoreService {
         .collection("users")
         .orderBy("entrytime", descending: true)
         .snapshots();
+  }
+
+  static Future<String> createDeppLink(String id) async {
+    final DynamicLinkParameters par = DynamicLinkParameters(
+      uriPrefix: "https://skribbl.page.link",
+      link: Uri.parse("https://skribbl.com/join?id=$id"),
+      androidParameters: AndroidParameters(packageName: "com.example.Skribbl"),
+    );
+    final Uri dynamicUrl = await par.buildUrl();
+    return dynamicUrl.toString();
+  }
+
+  static Future handleDynamicLinks() async {
+    print("Coming to handle dynamic links");
+
+    var value = await FirebaseDynamicLinks.instance.getInitialLink();
+    var x = handleDeepLinkData(value);
+    print(x);
+    return x;
+  }
+
+  static handleDeepLinkData(PendingDynamicLinkData data) {
+    print("Coming to handle deep link data");
+    print(data);
+    if (data == null) return null;
+    final Uri deepLink = data?.link;
+    if (deepLink != null) {
+      print(deepLink);
+      if (deepLink.path.contains("join")) {
+        print(deepLink.queryParameters['id']);
+        return deepLink.queryParameters['id'];
+      }
+    }
   }
 }
 //ux7Vh79cpAye2n2Sxl3m
