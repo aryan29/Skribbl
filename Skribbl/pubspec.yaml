@@ -34,6 +34,8 @@ dependencies:
   timer_count_down: ^1.0.4+1
   english_words: ^3.1.5
   firebase_dynamic_links: ^0.6.2
+  share: ^0.6.5+4
+  google_fonts: ^1.1.1
 
 dev_dependencies:
   flutter_test:

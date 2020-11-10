@@ -11,6 +11,7 @@ import 'start_game.dart';
 import 'package:timer_count_down/timer_count_down.dart';
 import 'package:english_words/english_words.dart';
 import "dart:math";
+import 'package:share/share.dart';
 
 class MyGame extends StatefulWidget {
   MyGame({Key key}) : super(key: key);
@@ -174,7 +175,14 @@ class _MyGame extends State<MyGame> {
                               child: FlatButton.icon(
                                   textColor: Colors.white,
                                   color: Colors.green,
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    String link =
+                                        await FirestoreService.createDeppLink(
+                                            global.roomid);
+                                    Share.share(
+                                        "Hey lets play together join us on $link",
+                                        subject: "Let's Play Together");
+                                  },
                                   icon: Icon(Icons.share),
                                   label: Text("Invite")),
                             ),
@@ -184,7 +192,10 @@ class _MyGame extends State<MyGame> {
                               child: FlatButton.icon(
                                   textColor: Colors.white,
                                   color: Colors.red,
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    FirestoreService.removeUser(global.roomid);
+                                    Navigator.pop(context);
+                                  },
                                   icon: Icon(Icons.delete),
                                   label: Text("Leave")),
                             )

@@ -77,7 +77,7 @@ class FirestoreService {
     return z;
   }
 
-  static removeUser(roomId, name) async {
+  static removeUser(roomId) async {
     var snap = await _db.collection("rooms").doc(roomId).get();
     var data = snap.data();
     data['users_id'].remove(global.key);
@@ -109,7 +109,6 @@ class FirestoreService {
           .collection("rooms")
           .doc(global.roomid)
           .set(data, SetOptions(merge: true));
-      print("Cleaning whiteboardssssss");
     });
   }
 
