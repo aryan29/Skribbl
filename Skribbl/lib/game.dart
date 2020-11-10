@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:whiteboardkit/whiteboardkit.dart';
 import 'database.dart';
@@ -50,8 +51,41 @@ class _MyGame extends State<MyGame> {
         resizeToAvoidBottomInset: false,
         // resizeToAvoidBottomPadding: false,
         appBar: AppBar(
-          title: Text("Skribbl"),
-        ),
+            leading: Builder(
+              builder: (context) => IconButton(
+                icon: Icon(Icons.chat),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              ),
+            ),
+            actions: [
+              Builder(
+                builder: (context) => IconButton(
+                  icon: Icon(Icons.person),
+                  onPressed: () => Scaffold.of(context).openEndDrawer(),
+                  tooltip:
+                      MaterialLocalizations.of(context).openAppDrawerTooltip,
+                ),
+              ),
+            ],
+            title: Text(
+              "Skribbl",
+              style: GoogleFonts.pacifico(color: Colors.pink[50]),
+            ),
+            shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.only(bottomLeft: Radius.circular(30))),
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: new LinearGradient(
+                  colors: [Colors.purple, Colors.pink[200]],
+                ),
+                borderRadius:
+                    BorderRadius.only(bottomLeft: Radius.circular(30)),
+              ),
+
+              // backgroundColor: Colors.purple[600],
+            )),
         drawer: ChatDrawer(),
         endDrawer: UsersDrawer(),
         body: StreamBuilder(

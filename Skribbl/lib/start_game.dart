@@ -119,6 +119,8 @@ class _StartScreenState extends State<StartScreen> {
                                     filled: true,
                                     fillColor: Colors.purple[200],
                                     hintText: "Name",
+                                    hintStyle:
+                                        TextStyle(color: Colors.pink[900]),
                                     border: OutlineInputBorder(
                                         borderRadius:
                                             BorderRadius.circular(20)),
@@ -193,6 +195,8 @@ class _StartScreenState extends State<StartScreen> {
                                             borderSide: BorderSide(
                                                 color: Colors.black)),
                                         hintText: "Enter code",
+                                        hintStyle:
+                                            TextStyle(color: Colors.pink[900]),
                                         filled: true,
                                         fillColor: Colors.purple[200],
                                         border: OutlineInputBorder(
