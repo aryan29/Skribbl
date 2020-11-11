@@ -9,8 +9,9 @@ class ChatDrawer extends StatefulWidget {
   _ChatDrawerState createState() => _ChatDrawerState();
 }
 
-class _ChatDrawerState extends State<ChatDrawer> {
+class _ChatDrawerState extends State<ChatDrawer>{
   var myMessageController = new TextEditingController();
+
   buildItem(data) {
     return Align(
       alignment: Alignment.topLeft,
@@ -19,7 +20,7 @@ class _ChatDrawerState extends State<ChatDrawer> {
         padding: EdgeInsets.all(5),
         width: 200,
         decoration: BoxDecoration(
-            color: Colors.cyan[50], borderRadius: BorderRadius.circular(10)),
+            color: Colors.blue[50], borderRadius: BorderRadius.circular(10)),
         margin: EdgeInsets.fromLTRB(5, 10, 5, 10),
         //color: Colors.cyan[50],
         child: Column(
@@ -27,8 +28,8 @@ class _ChatDrawerState extends State<ChatDrawer> {
           children: <Widget>[
             Text(
               data["name"],
-              style:
-                  TextStyle(color: Colors.green, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                  color: Colors.blue[900], fontWeight: FontWeight.w700),
             ),
             Text(
               data["value"],
@@ -45,13 +46,92 @@ class _ChatDrawerState extends State<ChatDrawer> {
   Widget build(BuildContext context) {
     double bottom = MediaQuery.of(context).viewInsets.bottom;
     double ht = MediaQuery.of(context).size.height;
+    print(bottom);
     return Stack(
       children: <Widget>[
         Positioned(
-          // top: 0,
+          top: ht / 8,
           child: Container(
-            height:50,
-            //  height: ht / 8.0,
+            height: 7 * ht / 8,
+            child: SingleChildScrollView(
+              reverse: true,
+              child: Column(
+                //shrinkWrap: true,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                      width: 300,
+                      //Chat Box
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          // 1st for showing messages
+                          // 2nd for entering message
+                          Container(
+                            height: ht * 7 / 8 - 50,
+                            margin: EdgeInsets.all(0),
+                            color: Colors.white,
+                            child: StreamBuilder(
+                              stream:
+                                  FirestoreService.getMessages(global.roomid),
+                              builder: (context, snapshot) {
+                                if (snapshot.data != null) {
+                                  print(snapshot.data.documents.length);
+                                  return ListView.builder(
+                                    shrinkWrap: true,
+                                    reverse: true,
+                                    itemCount: snapshot.data.documents.length,
+                                    itemBuilder: (context, index) => buildItem(
+                                        snapshot.data.documents[index]),
+                                  );
+                                } else {
+                                  return Container();
+                                }
+                              },
+                            ),
+                          ),
+                          Container(
+                            height: 50,
+                            child: TextField(
+                              controller: myMessageController,
+                              autofocus: false,
+                              decoration: InputDecoration(
+                                  hintText: "Type here",
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  hoverColor: Colors.pink,
+                                  suffixIcon: IconButton(
+                                      icon: Icon(Icons.play_arrow),
+                                      onPressed: () {
+                                        print("Button pressed");
+                                        //Function to send message from this user and add it to database
+                                        //And show it on screen of every other user too at the same time
+                                        FirestoreService.sendMessege(
+                                            global.roomid,
+                                            global.name,
+                                            myMessageController.text);
+                                        FocusScope.of(context).unfocus();
+                                        Future.delayed(
+                                            Duration(microseconds: 500), () {
+                                          //call back after 500  microseconds
+                                          myMessageController
+                                              .clear(); // clear textfield
+                                        });
+                                      })),
+                            ),
+                          )
+                        ],
+                      )),
+                  SizedBox(height: bottom),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          child: Container(
+              height: ht / 8.0,
               width: 300,
               color: Colors.purple[100],
               child: Center(
@@ -61,79 +141,7 @@ class _ChatDrawerState extends State<ChatDrawer> {
                           fontSize: 20,
                           fontWeight: FontWeight.bold)))),
         ),
-     /*    SingleChildScrollView(
-          reverse: true,
-          child: Column(
-            //shrinkWrap: true,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                  height: 7 * ht / 8.0,
-                  width: 300,
-                  //Chat Box
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      // 1st for showing messages
-                      // 2nd for entering message
-                      Container(
-                        height: 7 * ht / 8.0 - 50,
-                        margin: EdgeInsets.all(0),
-                        color: Colors.white,
-                        child: StreamBuilder(
-                          stream: FirestoreService.getMessages(global.roomid),
-                          builder: (context, snapshot) {
-                            if (snapshot.data != null) {
-                              print(snapshot.data.documents.length);
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                reverse: true,
-                                itemCount: snapshot.data.documents.length,
-                                itemBuilder: (context, index) =>
-                                    buildItem(snapshot.data.documents[index]),
-                              );
-                            } else {
-                              return Container();
-                            }
-                          },
-                        ),
-                      ),
-                      Container(
-                        height: 50,
-                        child: TextField(
-                          controller: myMessageController,
-                          autofocus: false,
-                          decoration: InputDecoration(
-                              hintText: "Type here",
-                              filled: true,
-                              fillColor: Colors.white,
-                              hoverColor: Colors.pink,
-                              suffixIcon: IconButton(
-                                  icon: Icon(Icons.play_arrow),
-                                  onPressed: () {
-                                    print("Button pressed");
-                                    //Function to send message from this user and add it to database
-                                    //And show it on screen of every other user too at the same time
-                                    FirestoreService.sendMessege(global.roomid,
-                                        global.name, myMessageController.text);
-                                    FocusScope.of(context).unfocus();
-                                    Future.delayed(Duration(microseconds: 500),
-                                        () {
-                                      //call back after 500  microseconds
-                                      myMessageController
-                                          .clear(); // clear textfield
-                                    });
-                                  })),
-                        ),
-                      )
-                    ],
-                  )),
-              SizedBox(height: bottom),
-            ],
-          ),
-        ),
-      
-       ],
+      ],
     );
   }
 }
@@ -148,16 +156,27 @@ class UsersDrawer extends StatefulWidget {
 class _UsersDrawerState extends State<UsersDrawer> {
   customizeUserName(var x) {
     return Align(
-        alignment: Alignment.topRight,
+        alignment: Alignment.center,
         child: Container(
-            width: 300,
+            width: 250,
             padding: EdgeInsets.all(10),
-            margin: EdgeInsets.only(bottom: 5),
-            color: Colors.deepPurpleAccent[100],
+            margin: EdgeInsets.only(bottom: 10),
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    colors: [Colors.purple[400], Colors.pink[400]]),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.pink, width: 4)),
+            // color: Colors.deepPurpleAccent[100],
             child: Column(
               children: <Widget>[
-                Text(x["name"]),
-                Text(x["score"].toString()),
+                Text(
+                  x["name"],
+                  style: GoogleFonts.alatsi(fontSize: 15, color: Colors.white),
+                ),
+                SizedBox(height: 5),
+                Text(x["score"].toString(),
+                    style: GoogleFonts.adamina(
+                        fontSize: 12, color: Colors.pink[50])),
               ],
             )));
   }
@@ -166,7 +185,9 @@ class _UsersDrawerState extends State<UsersDrawer> {
   Widget build(BuildContext context) {
     return Container(
       width: 300,
-      color: Colors.black,
+      alignment: Alignment.center,
+      margin: EdgeInsets.only(top: 20),
+      color: Colors.white,
       child: StreamBuilder(
           stream: FirestoreService.getUsersInRoom(global.roomid),
           builder: (context, snapshot) {
@@ -177,7 +198,8 @@ class _UsersDrawerState extends State<UsersDrawer> {
                   itemBuilder: (context, index) =>
                       customizeUserName(snapshot.data.documents[index]));
             } else
-              return Container();
+              return Container(
+                  child: Center(child: CircularProgressIndicator()));
           }),
     );
   }

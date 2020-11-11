@@ -27,10 +27,35 @@ bool readonly = true;
 String drawingUser;
 int time = 50;
 
-class _MyGame extends State<MyGame> {
+class _MyGame extends State<MyGame> with WidgetsBindingObserver {
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        print("app in resumed");
+        break;
+      case AppLifecycleState.inactive:
+        print("app in inactive");
+        break;
+      case AppLifecycleState.paused:
+        print("app in paused");
+        break;
+      case AppLifecycleState.detached:
+        print("app in detached");
+        break;
+    }
+  }
+
   @override
   void initState() {
     print("Coming to init state");
+    WidgetsBinding.instance.addObserver(this);
     myStream = new StreamController();
     super.initState();
   }
