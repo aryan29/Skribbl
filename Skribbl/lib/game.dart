@@ -191,8 +191,11 @@ class _MyGame extends State<MyGame> with WidgetsBindingObserver {
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ),
-                                if (readonly == false)
-                                  Container(child: Text(global.random_word)),
+                                (readonly == false)
+                                    ? Container(child: Text(global.random_word))
+                                    : Container(
+                                        child: Text(global.random_word.length
+                                            .toString())),
                               ],
                             )),
                         Expanded(
