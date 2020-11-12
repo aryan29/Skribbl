@@ -173,6 +173,16 @@ class _StartScreenState extends State<StartScreen> {
                                       ),
                                     ),
                                   ),
+                                  FlatButton(
+                                    child: Text("trial"),
+
+                                    onPressed: () async {
+                                      
+                                      String x = await FirestoreService
+                                          .handleDynamicLinks();
+                                      print(x);
+                                    },
+                                  ),
                                   SizedBox(height: 40),
                                   SizedBox(
                                     width: 150,

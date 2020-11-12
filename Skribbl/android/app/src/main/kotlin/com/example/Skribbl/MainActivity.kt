@@ -1,4 +1,4 @@
-package com.example.Skribbl
+package com.skribbl.game
 
 import io.flutter.embedding.android.FlutterActivity
 

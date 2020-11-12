@@ -46,6 +46,7 @@ class _ChatDrawerState extends State<ChatDrawer>{
   Widget build(BuildContext context) {
     double bottom = MediaQuery.of(context).viewInsets.bottom;
     double ht = MediaQuery.of(context).size.height;
+    
     print(bottom);
     return Stack(
       children: <Widget>[

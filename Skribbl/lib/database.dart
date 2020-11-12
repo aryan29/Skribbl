@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'global.dart' as global;
 import 'package:english_words/english_words.dart';
 import "dart:math";
@@ -170,32 +171,59 @@ class FirestoreService {
   }
 
   static Future<String> createDeppLink(String id) async {
+    String prefix = "https://skribbll.page.link";
     final DynamicLinkParameters par = DynamicLinkParameters(
-      uriPrefix: "https://skribbl.page.link",
-      link: Uri.parse("https://skribbl.com/join?id=$id"),
-      androidParameters: AndroidParameters(packageName: "com.example.Skribbl"),
+      uriPrefix: prefix,
+      link: Uri.parse("https://skribbll.page.link/room?id=$id"),
+      androidParameters:
+          AndroidParameters(packageName: "com.skribbl.game", minimumVersion: 0),
+      iosParameters: IosParameters(
+        bundleId: 'com.skribbl.game',
+        minimumVersion: '1',
+        appStoreId: '',
+      ),
     );
     final Uri dynamicUrl = await par.buildUrl();
-    return dynamicUrl.toString();
+
+    print(dynamicUrl);
+    final ShortDynamicLink shortenedLink =
+        await DynamicLinkParameters.shortenUrl(
+      dynamicUrl,
+      DynamicLinkParametersOptions(
+          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
+    );
+    print(shortenedLink.shortUrl);
+    String url = shortenedLink.shortUrl.toString();
+    return url;
   }
 
   static Future handleDynamicLinks() async {
     print("Coming to handle dynamic links");
-
+    await Future.delayed(Duration(seconds: 15));
     var value = await FirebaseDynamicLinks.instance.getInitialLink();
     var x = handleDeepLinkData(value);
     print(x);
+    // FirebaseDynamicLinks.instance.onLink(onSuccess: (dynamicLink) async {
+    //   var x = handleDeepLinkData(dynamicLink);
+    //   print("Inside listener");
+    //   return x;
+    // }, onError: (e) async {
+    //   debugPrint('DynamicLinks onError $e');
+    // });
     return x;
   }
 
   static handleDeepLinkData(PendingDynamicLinkData data) {
     print("Coming to handle deep link data");
     print(data);
+
     if (data == null) return null;
     final Uri deepLink = data?.link;
+
     if (deepLink != null) {
       print(deepLink);
-      if (deepLink.path.contains("join")) {
+      if (deepLink.path.contains("room")) {
+        print(deepLink.queryParametersAll);
         print(deepLink.queryParameters['id']);
         return deepLink.queryParameters['id'];
       }
@@ -205,3 +233,4 @@ class FirestoreService {
 //ux7Vh79cpAye2n2Sxl3m
 //ux7Vh9cpAye2n2Sxl3m
 //i9ikeSC0YUkAIkaOsC6p
+//https://skribbll.page.link/?link=https://skribbll.page.link&apn=com.skribbl.game&id=7
